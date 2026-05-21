@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ลงทะเบียนอบรมหมอพืช — คลินิกสุขภาพพืช</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sarabun', sans-serif; background: #f0f4f2; color: #1a1a1a; min-height: 100vh; }
+
+  /* ── Layout ── */
+  .page { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+
+  /* ── Header ── */
+  .header { background: linear-gradient(135deg, #085041 0%, #1D9E75 70%, #5DCAA5 100%);
+    border-radius: 16px; padding: 28px 28px 24px; color: #fff; margin-bottom: 20px; }
+  .header-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.18);
+    font-size: 12px; padding: 4px 14px; border-radius: 20px; margin-bottom: 12px; letter-spacing: .4px; }
+  .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .header p  { font-size: 13px; opacity: .85; line-height: 1.6; }
+
+  /* ── Section Card ── */
+  .card { background: #fff; border-radius: 14px; border: 1px solid #e4ede9; padding: 20px 22px; margin-bottom: 16px; }
+  .card-title { font-size: 12px; font-weight: 600; color: #0F6E56; text-transform: uppercase;
+    letter-spacing: .8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card-title svg { flex-shrink: 0; }
+
+  /* ── Form Fields ── */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
+  .req { color: #e24b4a; margin-left: 2px; }
+  input[type=text], input[type=tel], input[type=email], textarea, select {
+    width: 100%; padding: 10px 13px; border: 1px solid #d4ddd9; border-radius: 8px;
+    font-size: 14px; font-family: inherit; background: #fff; color: #1a1a1a;
+    transition: border-color .15s, box-shadow .15s; }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: #1D9E75; box-shadow: 0 0 0 3px rgba(29,158,117,.13); }
+  textarea { resize: none; min-height: 80px; line-height: 1.6; }
+
+  /* ── Fee Banner ── */
+  .fee-banner { background: #e1f5ee; border: 1px solid #9fe1cb; border-radius: 10px;
+    padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .fee-banner p { font-size: 13px; color: #085041; line-height: 1.5; }
+
+  /* ── Payment Method Toggle ── */
+  .pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .pay-opt { border: 1px solid #d4ddd9; border-radius: 10px; padding: 13px 16px; cursor: pointer;
+    display: flex; align-items: center; gap: 10px; transition: all .15s; }
+  .pay-opt:hover { border-color: #1D9E75; }
+  .pay-opt.active { border: 2px solid #1D9E75; background: #f0faf6; }
+  .pay-opt span { font-size: 14px; font-weight: 500; }
+
+  /* ── Bank / QR Info ── */
+  .bank-info { background: #f7faf9; border-radius: 10px; padding: 13px 16px;
+    margin-bottom: 16px; font-size: 14px; line-height: 2; border: 1px solid #e4ede9; }
+  .qr-box { text-align: center; padding: 20px; display: none; }
+  .qr-placeholder { width: 130px; height: 130px; background: #f0f4f2; border: 1px dashed #b0c4bb;
+    border-radius: 10px; margin: 0 auto 8px; display: flex; align-items: center;
+    justify-content: center; flex-direction: column; gap: 6px; }
+  .qr-placeholder svg { opacity: .35; }
+  .qr-placeholder p { font-size: 11px; color: #888; }
+
+  /* ── Upload Zone ── */
+  .upload-zone { border: 2px dashed #b8d4c8; border-radius: 10px; padding: 22px;
+    text-align: center; cursor: pointer; transition: all .2s; background: #f7faf9; }
+  .upload-zone:hover { border-color: #1D9E75; background: #f0faf6; }
+  .upload-zone p { font-size: 13px; color: #555; margin-top: 8px; }
+  .upload-zone small { font-size: 11px; color: #999; }
+  .upload-icon { color: #1D9E75; }
+  #fileInput { display: none; }
+
+  /* ── File Preview ── */
+  .file-preview { display: none; align-items: center; gap: 10px; background: #f0faf6;
+    border: 1px solid #9fe1cb; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
+  .file-preview .fname { flex: 1; font-size: 13px; font-weight: 500; color: #085041; }
+  .btn-remove { background: none; border: none; cursor: pointer; color: #888;
+    font-size: 18px; line-height: 1; padding: 2px 4px; }
+
+  /* ── Status Banner ── */
+  .status-wrap { margin-top: 12px; }
+  .status-banner { display: none; align-items: center; gap: 12px; padding: 12px 16px;
+    border-radius: 10px; font-size: 13px; line-height: 1.6; }
+  .status-checking { background: #FAEEDA; border: 1px solid #FAC775; color: #633806; }
+  .status-ok       { background: #EAF3DE; border: 1px solid #C0DD97; color: #27500A; }
+  .status-banner strong { font-weight: 600; }
+  .pulse { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; animation: pulse 1.4s ease-in-out infinite; }
+  .pulse-amber { background: #EF9F27; }
+  .pulse-green  { background: #3B6D11; animation: none; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+  /* ── Submit Button ── */
+  .btn-submit { width: 100%; padding: 14px; background: #0F6E56; color: #fff; border: none;
+    border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+    transition: background .2s, transform .1s; display: flex; align-items: center;
+    justify-content: center; gap: 8px; margin-top: 4px; }
+  .btn-submit:hover  { background: #085041; }
+  .btn-submit:active { transform: scale(.99); }
+  .btn-submit:disabled { background: #b0c4bb; cursor: not-allowed; }
+
+  /* ── Loading Spinner ── */
+  .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4);
+    border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Success Modal ── */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+  .modal { background: #fff; border-radius: 16px; padding: 32px 28px; max-width: 380px;
+    width: 100%; text-align: center; }
+  .modal-icon { width: 60px; height: 60px; border-radius: 50%; background: #EAF3DE;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .modal h2  { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .modal p   { font-size: 13px; color: #555; line-height: 1.7; }
+  .modal .reg-id { display: inline-block; background: #f0faf6; border: 1px solid #9fe1cb;
+    color: #0F6E56; font-size: 13px; font-weight: 700; padding: 4px 16px; border-radius: 20px; margin: 12px 0 4px; }
+  .btn-close { margin-top: 20px; padding: 10px 32px; background: #0F6E56; color: #fff;
+    border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit; }
+
+  /* ── Error ── */
+  .err { font-size: 12px; color: #e24b4a; margin-top: 4px; display: none; }
+
+  @media (max-width: 480px) {
+    .row-2 { grid-template-columns: 1fr; }
+    .pay-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ──────────────────────────── SUCCESS MODAL ──────────────────────────── -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>ส่งใบสมัครสำเร็จ!</h2>
+    <p>ระบบได้รับข้อมูลและสลิปของคุณแล้ว</p>
+    <div class="reg-id" id="modalRegId">REG-XXXXXXXX-XXXX</div>
+    <p style="margin-top:8px">ตรวจสอบอีเมลยืนยันที่ <strong id="modalEmail"></strong><br>เจ้าหน้าที่จะยืนยันภายใน 1 วันทำการ</p>
+    <button class="btn-close" onclick="document.getElementById('modal').style.display='none'">รับทราบ</button>
+  </div>
+</div>
+
+<!-- ──────────────────────────── MAIN PAGE ──────────────────────────── -->
+<div class="page">
+
+  <div class="header">
+    <div class="header-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12"/><path d="M12 6v6l4 2"/></svg>
+      คลินิกสุขภาพพืช
+    </div>
+    <h1>ลงทะเบียนอบรมหมอพืช</h1>
+    <p>กรอกข้อมูลและแนบสลิปชำระเงิน ระบบจะส่งอีเมลยืนยันให้คุณทันที</p>
+  </div>
+
+  <!-- ── ข้อมูลส่วนตัว ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      ข้อมูลส่วนตัว
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>ชื่อ<span class="req">*</span></label>
+        <input type="text" id="fname" placeholder="ชื่อ">
+        <p class="err" id="err-fname">กรุณากรอกชื่อ</p>
+      </div>
+      <div class="field">
+        <label>นามสกุล<span class="req">*</span></label>
+        <input type="text" id="lname" placeholder="นามสกุล">
+        <p class="err" id="err-lname">กรุณากรอกนามสกุล</p>
+      </div>
+    </div>
+    <div class="field">
+      <label>ที่อยู่<span class="req">*</span></label>
+      <textarea id="address" placeholder="บ้านเลขที่ ถนน ตำบล/แขวง อำเภอ/เขต จังหวัด รหัสไปรษณีย์"></textarea>
+      <p class="err" id="err-address">กรุณากรอกที่อยู่</p>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>เบอร์โทรศัพท์<span class="req">*</span></label>
+        <input type="tel" id="phone" placeholder="0XX-XXX-XXXX">
+        <p class="err" id="err-phone">กรุณากรอกเบอร์โทร</p>
+      </div>
+      <div class="field">
+        <label>อีเมล<span class="req">*</span></label>
+        <input type="email" id="email" placeholder="example@email.com">
+        <p class="err" id="err-email">กรุณากรอกอีเมลให้ถูกต้อง</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── หัวบิล ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="13" y2="13"/></svg>
+      ข้อมูลใบเสร็จ
+    </div>
+    <div class="field">
+      <label>หัวบิล / ชื่อที่ใช้ออกใบเสร็จ<span class="req">*</span></label>
+      <input type="text" id="billname" placeholder="ชื่อ-นามสกุล หรือชื่อหน่วยงาน">
+      <p class="err" id="err-billname">กรุณากรอกหัวบิล</p>
+    </div>
+    <div class="field">
+      <label>เลขประจำตัวผู้เสียภาษี / เลขบัตรประชาชน (ถ้ามี)</label>
+      <input type="text" id="taxid" placeholder="หมายเลข 13 หลัก" maxlength="13">
+    </div>
+    <div class="field">
+      <label>ที่อยู่สำหรับออกใบเสร็จ (หากต่างจากที่อยู่ด้านบน)</label>
+      <textarea id="billaddress" placeholder="กรอกเฉพาะกรณีที่แตกต่างจากที่อยู่ข้างต้น"></textarea>
+    </div>
+  </div>
+
+  <!-- ── การชำระเงิน ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      การชำระเงิน
+    </div>
+
+    <div class="fee-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#085041" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p>ค่าลงทะเบียนอบรมหมอพืช <strong>1,500 บาท</strong> (รวมเอกสาร อาหารกลางวัน และวุฒิบัตร)</p>
+    </div>
+
+    <div class="pay-grid">
+      <div class="pay-opt active" id="opt-bank" onclick="selectPay('bank')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="13" rx="2"/><path d="M12 2l9 6H3l9-6z"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg>
+        <span>โอนผ่านธนาคาร</span>
+      </div>
+      <div class="pay-opt" id="opt-qr" onclick="selectPay('qr')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="5" y="5" width="3" height="3"/><rect x="16" y="5" width="3" height="3"/><rect x="5" y="16" width="3" height="3"/><line x1="14" y1="14" x2="14" y2="14"/><line x1="17" y1="14" x2="21" y2="14"/><line x1="21" y1="17" x2="21" y2="21"/><line x1="17" y1="21" x2="14" y2="21"/><line x1="14" y1="18" x2="17" y2="18"/></svg>
+        <span>QR PromptPay</span>
+      </div>
+    </div>
+
+    <div class="bank-info" id="bank-detail">
+      <strong>ธนาคารกสิกรไทย</strong><br>
+      ชื่อบัญชี: <strong>คลินิกสุขภาพพืช</strong><br>
+      เลขที่บัญชี: <strong>1234-5-67890-1</strong><br>
+      สาขา: เกษตรกลาง
+    </div>
+    <div class="qr-box" id="qr-detail">
+      <div class="qr-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <p>QR PromptPay</p>
+      </div>
+      <p style="font-size:13px;color:#555">สแกนเพื่อชำระ 1,500 บาท</p>
+    </div>
+
+    <!-- Upload -->
+    <div class="field">
+      <label>แนบสลิปการชำระเงิน<span class="req">*</span></label>
+      <div class="upload-zone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        <p>คลิกหรือลากไฟล์มาวางที่นี่</p>
+        <small>รองรับ JPG, PNG, PDF ขนาดไม่เกิน 5 MB</small>
+      </div>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,application/pdf" onchange="handleFile(event)">
+      <div class="file-preview" id="filePreview">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="fname" id="fileName">-</span>
+        <button class="btn-remove" onclick="removeFile()" aria-label="ลบไฟล์">✕</button>
+      </div>
+      <p class="err" id="err-file">กรุณาแนบสลิปการชำระเงิน</p>
+    </div>
+
+    <!-- Status -->
+    <div class="status-wrap">
+      <div class="status-banner status-checking" id="statusChecking">
+        <div class="pulse pulse-amber"></div>
+        <div><strong>กำลังตรวจสอบ...</strong><br>ระบบได้รับสลิปแล้ว รอเจ้าหน้าที่ยืนยันภายใน 1 วันทำการ</div>
+      </div>
+      <div class="status-banner status-ok" id="statusOk">
+        <div class="pulse pulse-green"></div>
+        <div><strong>แนบสลิปสำเร็จ</strong><br>ระบบจะส่งอีเมลยืนยันเมื่อเจ้าหน้าที่ตรวจสอบแล้ว</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
+    <span id="btnText">ส่งใบสมัคร</span>
+    <div class="spinner" id="spinner"></div>
+  </button>
+
+</div><!-- /page -->
+
+<script>
+// ════════════════════════════════════════════════════════
+//  ⬇️  วาง Web App URL จาก Google Apps Script ตรงนี้
+// ════════════════════════════════════════════════════════
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxDeaktM88bAW1tN7b-BXHPsvf80TVoUpHVuWkjU7sY-7F4PmXb8CQSwvjrOZSdlcuvqw/exec";
+
+let selectedFile = null;
+let selectedPay  = "bank";
+
+// ── เลือกวิธีชำระ ──
+function selectPay(type) {
+  selectedPay = type;
+  document.getElementById("opt-bank").classList.toggle("active", type === "bank");
+  document.getElementById("opt-qr").classList.toggle("active",  type === "qr");
+  document.getElementById("bank-detail").style.display = type === "bank" ? "block" : "none";
+  document.getElementById("qr-detail").style.display   = type === "qr"   ? "block" : "none";
+}
+
+// ── จัดการไฟล์ ──
+function handleFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (f.size > 5 * 1024 * 1024) { alert("ไฟล์มีขนาดเกิน 5 MB กรุณาเลือกไฟล์ใหม่"); return; }
+  selectedFile = f;
+  document.getElementById("fileName").textContent = f.name;
+  document.getElementById("filePreview").style.display = "flex";
+  document.getElementById("err-file").style.display = "none";
+  // แสดง status
+  document.getElementById("statusChecking").style.display = "flex";
+  document.getElementById("statusOk").style.display       = "none";
+  setTimeout(() => {
+    document.getElementById("statusChecking").style.display = "none";
+    document.getElementById("statusOk").style.display       = "flex";
+  }, 2000);
+}
+
+function removeFile() {
+  selectedFile = null;
+  document.getElementById("fileInput").value = "";
+  document.getElementById("filePreview").style.display = "none";
+  document.getElementById("statusChecking").style.display = "none";
+  document.getElementById("statusOk").style.display       = "none";
+}
+
+// ── Drag & Drop ──
+const zone = document.getElementById("dropzone");
+zone.addEventListener("dragover",  e => { e.preventDefault(); zone.style.borderColor = "#1D9E75"; });
+zone.addEventListener("dragleave", () => zone.style.borderColor = "");
+zone.addEventListener("drop", e => {
+  e.preventDefault(); zone.style.borderColor = "";
+  const f = e.dataTransfer.files[0];
+  if (f) { document.getElementById("fileInput").files = e.dataTransfer.files; handleFile({ target: { files: [f] } }); }
+});
+
+// ── Validation ──
+function validate() {
+  let ok = true;
+  const fields = ["fname","lname","address","phone","email","billname"];
+  fields.forEach(id => {
+    const v = document.getElementById(id).value.trim();
+    const err = document.getElementById("err-" + id);
+    const invalid = !v || (id === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+    err.style.display = invalid ? "block" : "none";
+    if (invalid) ok = false;
+  });
+  const errFile = document.getElementById("err-file");
+  if (!selectedFile) { errFile.style.display = "block"; ok = false; }
+  else { errFile.style.display = "none"; }
+  return ok;
+}
+
+// ── แปลงไฟล์เป็น Base64 ──
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = () => res(r.result);
+    r.onerror = () => rej(new Error("อ่านไฟล์ไม่ได้"));
+    r.readAsDataURL(file);
+  });
+}
+
+// ── Submit ──
+async function handleSubmit() {
+  if (!validate()) return;
+
+  const btn     = document.getElementById("submitBtn");
+  const btnText = document.getElementById("btnText");
+  const spinner = document.getElementById("spinner");
+
+  btn.disabled      = true;
+  btnText.textContent = "กำลังส่งข้อมูล...";
+  spinner.style.display = "block";
+
+  try {
+    const base64 = await toBase64(selectedFile);
+    const payload = {
+      fname:       document.getElementById("fname").value.trim(),
+      lname:       document.getElementById("lname").value.trim(),
+      address:     document.getElementById("address").value.trim(),
+      phone:       document.getElementById("phone").value.trim(),
+      email:       document.getElementById("email").value.trim(),
+      billname:    document.getElementById("billname").value.trim(),
+      taxid:       document.getElementById("taxid").value.trim(),
+      billaddress: document.getElementById("billaddress").value.trim(),
+      payMethod:   selectedPay === "bank" ? "โอนผ่านธนาคาร" : "QR PromptPay",
+      slipBase64:  base64,
+      slipName:    selectedFile.name,
+    };
+
+    // ใช้ no-cors เพื่อหลีกเลี่ยงปัญหา CORS จาก browser
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(payload)
+    });
+
+    // no-cors ไม่คืน response body — แต่ถ้าไม่ throw แปลว่า Apps Script ได้รับข้อมูลแล้ว
+    const today = new Date();
+    const regId = "REG-"
+      + today.getFullYear()
+      + String(today.getMonth()+1).padStart(2,"0")
+      + String(today.getDate()).padStart(2,"0")
+      + "-" + String(Math.floor(Math.random()*9000)+1000);
+
+    document.getElementById("modalRegId").textContent = regId;
+    document.getElementById("modalEmail").textContent = payload.email;
+    document.getElementById("modal").style.display    = "flex";
+
+  } catch (err) {
+    alert("ส่งข้อมูลไม่สำเร็จ: " + err.message + "\nกรุณาตรวจสอบ Apps Script URL และ Who has access = Anyone");
+  } finally {
+    btn.disabled         = false;
+    btnText.textContent  = "ส่งใบสมัคร";
+    spinner.style.display = "none";
+  }
+}
+</script>
+</body>
+</html>
